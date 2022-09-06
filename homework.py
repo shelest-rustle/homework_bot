@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 
 def send_message(bot, message):
     """Отправляет сообщение в телеграм."""
-
     logger.info('Отправка сообщения в телеграм началась.')
     chat_id = TELEGRAM_CHAT_ID
     try:
@@ -49,7 +48,6 @@ def send_message(bot, message):
 
 def get_api_answer(current_timestamp):
     """Отправляет запрос к эндпоинту Яндекс.Домашки."""
-
     timestamp = current_timestamp or int(time.time())
     requests_params = {
         'url': ENDPOINT,
@@ -73,8 +71,10 @@ def get_api_answer(current_timestamp):
 
 
 def parse_status(homework):
-    """Возвращает из конкретной домашней работы
-       информацию о её статусе."""
+    """
+    Возвращает из конкретной домашней работы
+    информацию о её статусе.
+    """
     if homework is None:
         raise ValueError('Список homework отсутствует.')
     try:
@@ -89,7 +89,6 @@ def parse_status(homework):
 
 def check_response(response):
     """Проверяет ответ API на корректность."""
-
     logger.info('Проверка API на корректность началась')
     if not isinstance(response, dict):
         raise TypeError('Ответ API должен быть словарём!')
@@ -111,7 +110,6 @@ def check_response(response):
 
 def check_tokens():
     """Проверяет наличие нужных переменных среды."""
-
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         return True
     else:
@@ -120,7 +118,6 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
-
     logging.basicConfig(
         handlers=[
             logging.StreamHandler(), logging.FileHandler(
