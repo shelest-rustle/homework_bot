@@ -71,9 +71,7 @@ def get_api_answer(current_timestamp):
 
 
 def parse_status(homework):
-    """
-    Возвращает из конкретной домашней работы информацию о её статусе.
-    """
+    """Возвращает из конкретной домашней работы информацию о её статусе."""
     if homework is None:
         raise ValueError('Список homework отсутствует.')
     try:
