@@ -35,11 +35,11 @@ def send_message(bot, message):
     try:
         bot.send_message(chat_id, text=message)
     except telegram.error.Unauthorized as error:
-        logger.error(
+        raise error(
             f'Сообщение в Telegram не отправлено, ошибка авторизации {error}.'
         )
     except telegram.error.TelegramError as error:
-        logger.error(
+        raise error(
             f'Сообщение в Telegram не отправлено {error}'
         )
     else:
@@ -79,8 +79,7 @@ def parse_status(homework):
         homework_status = homework['status']
         verdict = HOMEWORK_STATUSES[homework_status]
         return f'Изменился статус проверки работы "{homework_name}". {verdict}'
-    except KeyError as error:
-        logger.error(f'Ошибка доступа по ключу {error}')
+    except KeyError:
         raise KeyError('Неизвестный статус работы')
 
 
@@ -89,28 +88,20 @@ def check_response(response):
     logger.info('Проверка API на корректность началась')
     if not isinstance(response, dict):
         raise TypeError('Ответ API должен быть словарём!')
-    try:
-        homeworks = response['homeworks']
-    except KeyError as e:
+    homeworks = response['homeworks']
+    if 'homeworks' not in response:
         raise KeyError(
-            f'Ошибка доступа по ключу homeworks или response: {e}'
+            'Ошибка доступа по ключу homeworks или response'
         )
     if not isinstance(homeworks, list):
         raise TypeError(
             'Данные не читаемы')
-    if not homeworks:
-        raise exceptions.EmptyListError(
-            'Нет обновлений'
-        )
     return homeworks
 
 
 def check_tokens():
     """Проверяет наличие нужных переменных среды."""
-    if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
-        return True
-    else:
-        return False
+    return all((PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID))
 
 
 def main():
@@ -129,17 +120,22 @@ def main():
         old_errors = ''
         logger.critical('Ошибка запуска бота: переменные отсутствуют')
         sys.exit('Выход из прогрмаммы: переменные отсутствуют')
-    else:
-        logger.info('Запуск бота')
-        bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
+    logger.info('Запуск бота')
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+
     while True:
         current_name = ''
-        current_timestamp: int = 1549962000
+        current_timestamp: int = int(time.time())
         prev_report = {
             'name_messages': current_name,
         }
         response = get_api_answer(current_timestamp)
         homeworks = check_response(response)
+        if not homeworks:
+            raise exceptions.EmptyListError(
+                'Нет обновлений'
+            )
         current_report = {
             'name_messages': homeworks[0].get('homework_name'),
             'output': homeworks[0].get('data')
