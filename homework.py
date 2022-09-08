@@ -117,7 +117,6 @@ def main():
         level=logging.INFO)
 
     if not check_tokens():
-        old_errors = ''
         logger.critical('Ошибка запуска бота: переменные отсутствуют')
         sys.exit('Выход из прогрмаммы: переменные отсутствуют')
 
@@ -150,9 +149,7 @@ def main():
                 logging.debug('Статус не изменился')
         except Exception as error:
             message = f'Сбой в работе функции main {error}'
-            if old_errors != str(error):
-                old_errors = str(error)
-                send_message(bot, message)
+            send_message(bot, message)
             logger.critical(message)
         finally:
             time.sleep(RETRY_TIME)
