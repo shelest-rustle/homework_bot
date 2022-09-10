@@ -131,7 +131,6 @@ def main():
                 'name_messages': current_name,
             }
             response = get_api_answer(current_timestamp)
-            print(response)
             homeworks = check_response(response)
             if homeworks:
                 current_report = {
