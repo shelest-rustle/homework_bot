@@ -124,29 +124,29 @@ def main():
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
 
     while True:
-        current_name = ''
-        current_timestamp: int = int(time.time())
-        prev_report = {
-            'name_messages': current_name,
-        }
-        response = get_api_answer(current_timestamp)
-        homeworks = check_response(response)
-        if not homeworks:
-            raise exceptions.EmptyListError(
-                'Нет обновлений'
-            )
-        current_report = {
-            'name_messages': homeworks[0].get('homework_name'),
-            'output': homeworks[0].get('data')
-        }
         try:
-            if current_report != prev_report:
-                prev_report = current_report
-                message = parse_status(homeworks[0])
-                send_message(bot, message)
-                prev_report = current_report.copy()
+            current_name = ''
+            current_timestamp: int = int(time.time())
+            prev_report = {
+                'name_messages': current_name,
+            }
+            response = get_api_answer(current_timestamp)
+            print(response)
+            homeworks = check_response(response)
+            if homeworks:
+                current_report = {
+                    'name_messages': homeworks[0].get('homework_name'),
+                    'output': homeworks[0].get('data')
+                }
+                if current_report != prev_report:
+                    prev_report = current_report
+                    message = parse_status(homeworks[0])
+                    send_message(bot, message)
+                    prev_report = current_report.copy()
+                else:
+                    logging.debug('Статус не изменился')
             else:
-                logging.debug('Статус не изменился')
+                logger.info('Нет обновлений')
         except Exception as error:
             message = f'Сбой в работе функции main {error}'
             send_message(bot, message)
